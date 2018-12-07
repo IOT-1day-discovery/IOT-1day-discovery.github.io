@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>fetchIpks - Home</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <style>
+
+    #main section header {
+        display: none;
+    }
+    nav > ul > li > a, a {
+        color: black;
+    }
+    nav a:hover, a:active {
+        color: #8da6ce;
+        border-bottom-color: #8da6ce;
+    }
+
+    h4.name, .type-signature {
+        color: #8da6ce;
+        background: black;
+    }
+    h4.name a {
+        color: #8da6ce;
+    }
+    h4.name a:hover, .type-signature a:hover  {
+        background-color: rgba(187,239,253,0.3);
+        border-bottom-color: #8da6ce;
+    }
+    .signature {
+        color: #ddd;
+    }
+    h4.name a, article a {
+        background-color: rgba(187,239,253,0.3);
+    }
+    p.summary {
+        display:none;
+    }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="DebianPackages.html">DebianPackages</a><ul class='methods'><li data-type='method'><a href="DebianPackages.html#fetchAllFiles">fetchAllFiles</a></li></ul></li><li><a href="FetchPackages.html">FetchPackages</a><ul class='methods'><li data-type='method'><a href="FetchPackages.html#downloadFile">downloadFile</a></li><li data-type='method'><a href="FetchPackages.html#fetchAllFiles">fetchAllFiles</a></li><li data-type='method'><a href="FetchPackages.html#fetchAllFilesHelper">fetchAllFilesHelper</a></li><li data-type='method'><a href="FetchPackages.html#fileNameConstructor">fileNameConstructor</a></li><li data-type='method'><a href="FetchPackages.html#unzip">unzip</a></li><li data-type='method'><a href="FetchPackages.html#urlConstructior">urlConstructior</a></li></ul></li><li><a href="RasbianPackages.html">RasbianPackages</a><ul class='methods'><li data-type='method'><a href="RasbianPackages.html#fileNameConstructor">fileNameConstructor</a></li></ul></li><li><a href="UbuntuPackages.html">UbuntuPackages</a></li></ul><h3>Global</h3><ul><li><a href="global.html#checksumFile">checksumFile</a></li><li><a href="global.html#downloadAndComputeHashes">downloadAndComputeHashes</a></li><li><a href="global.html#downloadFile">downloadFile</a></li><li><a href="global.html#extractIpk">extractIpk</a></li><li><a href="global.html#InvokeArchSetter">InvokeArchSetter</a></li><li><a href="global.html#InvokeArchTypes">InvokeArchTypes</a></li><li><a href="global.html#InvokeCodeNamesSetter">InvokeCodeNamesSetter</a></li><li><a href="global.html#InvokeIpkDownload">InvokeIpkDownload</a></li><li><a href="global.html#InvokeIpkFetch">InvokeIpkFetch</a></li><li><a href="global.html#InvokeVersionsSetter">InvokeVersionsSetter</a></li><li><a href="global.html#mkDir">mkDir</a></li><li><a href="global.html#promiseFromChildProcess">promiseFromChildProcess</a></li><li><a href="global.html#readFile">readFile</a></li><li><a href="global.html#run">run</a></li><li><a href="global.html#runJsonConversion">runJsonConversion</a></li><li><a href="global.html#walkAndComputeHashes">walkAndComputeHashes</a></li><li><a href="global.html#walkFs">walkFs</a></li><li><a href="global.html#writeChunk">writeChunk</a></li><li><a href="global.html#writeFile">writeFile</a></li><li><a href="global.html#writeStream">writeStream</a></li></ul>
+</nav>
+
+<div id="main">
+    
+
+    
+
+
+
+    
+
+
+
+
+
+
+
+
+
+    
+
+
+    <section class="readme">
+        <article><h1>IOT-1day-discovery:fetching files</h1><h2>web crawling</h2><p>please be courteous to the package repositories. Its really easy to get package explosion.</p>
+<h3>Fetching ipks from http://archive.openwrt.org/</h3><p>the archive has no api so we have to convert html tables to json in the fetchIpks package.</p>
+<pre class="prettyprint source lang-json"><code>[
+    &quot;attitude_adjustment/&quot;,
+    &quot;backfire/&quot;,
+    &quot;barrier_breaker/&quot;,
+    &quot;chaos_calmer/&quot;,
+    &quot;kamikaze/&quot;,
+    &quot;releases/&quot;,
+    &quot;snapshots/&quot;
+]</code></pre><p>Above is an example of what one of the cache files will look like.
+Each step of fetchIpks will take a exponentially longer time. which is why caching is so key to that project.</p>
+<pre class="prettyprint source"><code>downloadAndComputeHashes- > InvokeIpkDownload -> InvokeIpkFetch -> InvokeArchTypes -> 
+InvokeArchSetter -> InvokeVersionsSetter -> InvokeCodeNamesSetter</code></pre><p>from <em>InvokeIpkFetch</em> to <em>InvokeCodeNamesSetter</em> we are just building up every combination of ipk links we need to download. <em>InvokeIpkDownload</em> actually downloads the files.</p>
+<pre class="prettyprint source"><code>downloadAndComputeHashes- > walkAndComputeHashes -> extractIpk</code></pre><p><em>downloadAndComputeHashes</em>  uses <em>walkFs</em> to walk the filesystem hierarchy and generate a list of every ipk file
+downloaded. Then we use extractIpk to decompress and then generate the hash of all the files inside the package.
+an Ipk package has the following format:</p>
+<pre class="prettyprint source"><code>data.tar.gz
+control.tar.gz</code></pre><p>At the end of the run you should see the following files in cache/</p>
+<ul>
+<li>codeNames-cache.json</li>
+<li>archOffsets-cache.json</li>
+<li>archTypes-cache.json</li>
+<li>versionTypes-cache.json</li>
+<li>ipks-cache.json</li>
+<li>ipksha1.json</li>
+</ul>
+<p><em>ipksha1.json</em> is imported into the mongodb database using:
+-tools/importJsonToMdb.sh</p>
+<h3>Fetching and parsing package.gz</h3><p>repos used:</p>
+<ul>
+<li>http://archive.debian.org/debian/dists/</li>
+<li>http://archive.openwrt.org/</li>
+<li>http://cz.archive.ubuntu.com/ubuntu/dists/</li>
+<li>https://archive.raspbian.org/raspbian/dists/</li>
+</ul>
+<p><em>fetchPackages.js</em> has been specialized for each of these distros to pull down package.gz  files.
+While we are no longer using this for package retrieval, the version info stored within is very helpful
+for retreiving version number in a reiliable fashion. something we need for the cve poriton of the project.
+In any case PackageParserCLI has been written to decompress each package.gz fetched by fetchPackages.js parse them into a json and store them into the database.</p></article>
+    </section>
+
+
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Dec 07 2018 00:16:53 GMT-0500 (Eastern Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>
